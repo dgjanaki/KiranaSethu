@@ -1,8 +1,8 @@
 import React from 'react';
 import { KIRANA_PRODUCTS } from '../../data/products';
-import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Store, ArrowLeft } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Store, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
 
-export default function CommonCartView({ cart, onUpdateQuantity, onRemoveItem, onFindShops, onBackToMethods }) {
+export default function CommonCartView({ cart, selectedShop, onUpdateQuantity, onRemoveItem, onFindShops, onBackToMethods }) {
   // Map cart IDs to actual product objects with quantity
   const cartEntries = Object.entries(cart)
     .map(([id, qty]) => {
@@ -97,6 +97,17 @@ export default function CommonCartView({ cart, onUpdateQuantity, onRemoveItem, o
           {/* Cart Summary & CTA Panel */}
           <div className="cart-summary-panel">
             <div className="summary-card">
+              {/* Selected shop banner */}
+              {selectedShop && (
+                <div className="cart-selected-shop-banner">
+                  <Store size={15} color="var(--primary)" />
+                  <div>
+                    <span className="cart-shop-banner-label">Shopping from:</span>
+                    <strong className="cart-shop-banner-name">{selectedShop.name}</strong>
+                  </div>
+                  <ShieldCheck size={14} color="var(--primary)" />
+                </div>
+              )}
               <h3>Order Summary</h3>
 
               <div className="summary-row">

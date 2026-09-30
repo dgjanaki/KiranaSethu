@@ -71,9 +71,18 @@ CREATE TABLE IF NOT EXISTS public.orders (
     est_time VARCHAR(50) DEFAULT '30-45 mins',
     customer_name VARCHAR(255) NOT NULL,
     customer_location TEXT NOT NULL,
+    -- Scheduled Delivery fields (NULL = deliver now)
+    delivery_type VARCHAR(20) DEFAULT 'now',         -- 'now' | 'scheduled'
+    scheduled_date DATE DEFAULT NULL,                -- e.g. 2025-10-15
+    scheduled_time_slot VARCHAR(50) DEFAULT NULL,    -- e.g. '10:00 AM – 12:00 PM'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Safe migration: add scheduled delivery columns if table already exists
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_type VARCHAR(20) DEFAULT 'now';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS scheduled_date DATE DEFAULT NULL;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS scheduled_time_slot VARCHAR(50) DEFAULT NULL;
 
 -- 6. ORDER ITEMS TABLE
 CREATE TABLE IF NOT EXISTS public.order_items (

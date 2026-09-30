@@ -96,6 +96,10 @@ export async function createOrderInDatabase(orderData) {
     delivery_fee: orderData.deliveryFee,
     grand_total: orderData.grandTotal,
     delivery_mode: orderData.deliveryMode || 'Delivery Partner',
+    // Scheduled delivery fields — null means deliver now
+    delivery_type: orderData.deliveryType || 'now',
+    scheduled_date: orderData.scheduledDate || null,
+    scheduled_time_slot: orderData.scheduledTimeSlot || null,
     status: 'NEW',
     created_at: new Date().toISOString(),
     items: orderData.items
@@ -113,6 +117,9 @@ export async function createOrderInDatabase(orderData) {
           delivery_fee: orderData.deliveryFee,
           grand_total: orderData.grandTotal,
           delivery_mode: orderData.deliveryMode,
+          delivery_type: orderData.deliveryType || 'now',
+          scheduled_date: orderData.scheduledDate || null,
+          scheduled_time_slot: orderData.scheduledTimeSlot || null,
           status: 'NEW',
           customer_name: orderData.customerName,
           customer_location: orderData.customerLocation

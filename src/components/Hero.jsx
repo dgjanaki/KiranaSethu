@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { ShoppingBag, Store, MapPin, Check, ShieldCheck, Search, Truck, CheckCircle2 } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { ShoppingBag, Store, MapPin, Check, ShieldCheck, Search, Truck, CheckCircle2, Navigation, Loader, AlertCircle } from 'lucide-react';
 
 export default function Hero({ onOpenAuth, onNavigate }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [locationState, setLocationState] = useState('idle'); // idle | requesting | success | denied | error
+  const [locationLabel, setLocationLabel] = useState('');
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -10,6 +12,27 @@ export default function Hero({ onOpenAuth, onNavigate }) {
       onNavigate('customer-flow', 'manual_select');
     }
   };
+
+  const handleUseLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocationState('error');
+      return;
+    }
+    setLocationState('requesting');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocationState('success');
+        setLocationLabel(`${pos.coords.latitude.toFixed(3)}°N, ${pos.coords.longitude.toFixed(3)}°E`);
+        // Navigate to shop discovery with location
+        if (onNavigate) onNavigate('customer-flow', 'find_shops');
+      },
+      () => {
+        setLocationState('denied');
+        setLocationLabel('');
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }, [onNavigate]);
 
   return (
     <section className="hero">
@@ -41,6 +64,62 @@ export default function Hero({ onOpenAuth, onNavigate }) {
               <Search size={16} /> Search
             </button>
           </form>
+
+          {/* LOCATION SECTION — Find Kirana Shops Near You */}
+          <div className="hero-location-section">
+            <div className="hero-location-header">
+              <div className="hero-location-icon">
+                <MapPin size={18} color="var(--primary)" />
+              </div>
+              <div>
+                <h3 className="hero-location-title">Find Kirana Shops Near You</h3>
+                <p className="hero-location-sub">Use your live location to discover trusted shops within walking distance</p>
+              </div>
+            </div>
+            
+            {locationState === 'idle' && (
+              <div className="hero-location-actions">
+                <button className="btn btn-primary btn-sm hero-location-btn" onClick={handleUseLocation}>
+                  <Navigation size={16} />
+                  Use My Location
+                </button>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onNavigate && onNavigate('customer-flow', 'find_shops')}
+                >
+                  Browse Shops
+                </button>
+              </div>
+            )}
+
+            {locationState === 'requesting' && (
+              <div className="hero-location-loading">
+                <Loader size={16} className="location-spin-icon" color="var(--primary)" />
+                <span>Detecting your location...</span>
+              </div>
+            )}
+
+            {locationState === 'success' && (
+              <div className="hero-location-success">
+                <CheckCircle2 size={16} color="var(--primary)" />
+                <span>📍 Location detected — showing nearby shops</span>
+              </div>
+            )}
+
+            {locationState === 'denied' && (
+              <div className="hero-location-denied">
+                <AlertCircle size={16} color="#dc2626" />
+                <span>Location permission denied. </span>
+                <button
+                  className="btn-link"
+                  style={{ fontSize: '0.875rem' }}
+                  onClick={() => onNavigate && onNavigate('customer-flow', 'find_shops')}
+                >
+                  Use demo location instead
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Primary & Secondary Action Buttons */}
           <div className="hero-cta">
